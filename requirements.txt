@@ -1,0 +1,16 @@
+# requirements.txt
+# Compilador
+pyinstaller
+
+# Dependencias de la GUI, utilidades y base de datos
+customtkinter
+appdirs
+
+# Dependencias de Web Scraping (Módulo BCV)
+requests
+beautifulsoup4
+urllib3
+
+# Dependencias de Reportes (PDF y Calendario)
+fpdf2
+tkcalendar
