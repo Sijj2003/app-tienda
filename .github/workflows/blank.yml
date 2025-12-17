@@ -1,0 +1,50 @@
+name: Build Sistema Punto de Venta
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          architecture: 'x64'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Compilar con PyInstaller
+        shell: pwsh
+        run: |
+          # Obtenemos la ruta de customtkinter para incluir sus temas y json
+          $ctk_path = python -c "import customtkinter; import os; print(os.path.dirname(customtkinter.__file__))"
+          
+          # Ejecución de PyInstaller
+          # --onefile: Crea un solo archivo .exe
+          # --windowed: Evita que se abra una ventana de consola negra
+          # --collect-submodules: Asegura que tkcalendar y babel se incluyan bien
+          # --add-data: Incluye los archivos internos de la interfaz moderna
+          pyinstaller --onefile --windowed `
+            --name "SistemaPuntoVenta" `
+            --add-data "$($ctk_path);customtkinter/" `
+            --collect-submodules "tkcalendar" `
+            --collect-submodules "babel" `
+            --hidden-import "babel.numbers" `
+            main_app.py
+
+      - name: Subir archivo ejecutable
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sistema-Punto-Venta-EXE
+          path: dist/SistemaPuntoVenta.exe
