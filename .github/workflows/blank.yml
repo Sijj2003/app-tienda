@@ -1,4 +1,4 @@
-name: Build Sistema Punto de Venta
+name: Build Sistema Punto de Venta con Logo
 
 on:
   push:
@@ -12,6 +12,11 @@ jobs:
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
+
+      # Importante: Este paso asegura que el archivo de icono exista antes de compilar
+      - name: Verificar Archivos
+        run: |
+          if (Test-Path "logo.ico") { echo "Icono encontrado" } else { echo "Error: logo.ico no encontrado" }
 
       - name: Configurar Python 3.11
         uses: actions/setup-python@v5
@@ -27,16 +32,12 @@ jobs:
       - name: Compilar con PyInstaller
         shell: pwsh
         run: |
-          # Obtenemos la ruta de customtkinter para incluir sus temas y json
           $ctk_path = python -c "import customtkinter; import os; print(os.path.dirname(customtkinter.__file__))"
           
-          # Ejecución de PyInstaller
-          # --onefile: Crea un solo archivo .exe
-          # --windowed: Evita que se abra una ventana de consola negra
-          # --collect-submodules: Asegura que tkcalendar y babel se incluyan bien
-          # --add-data: Incluye los archivos internos de la interfaz moderna
+          # Añadimos el flag --icon "logo.ico"
           pyinstaller --onefile --windowed `
             --name "SistemaPuntoVenta" `
+            --icon "logo.ico" `
             --add-data "$($ctk_path);customtkinter/" `
             --collect-submodules "tkcalendar" `
             --collect-submodules "babel" `
@@ -46,5 +47,5 @@ jobs:
       - name: Subir archivo ejecutable
         uses: actions/upload-artifact@v4
         with:
-          name: Sistema-Punto-Venta-EXE
+          name: Sistema-Punto-Venta-Con-Logo
           path: dist/SistemaPuntoVenta.exe
